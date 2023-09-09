@@ -102,21 +102,21 @@ removeV2Ray() {
     rm -rf /etc/profile.d/iptables.sh >/dev/null 2>&1
     rm -rf /root/.iptables >/dev/null 2>&1
 
-    #删除v2ray定时更新任务
-    crontab -l|sed '/SHELL=/d;/v2ray/d'|sed '/SHELL=/d;/xray/d' > crontab.txt
-    crontab crontab.txt >/dev/null 2>&1
-    rm -f crontab.txt >/dev/null 2>&1
+#删除v2ray定时更新任务
+crontab -l | sed '/SHELL=/d;/v2ray/d' | sed '/SHELL=/d;/xray/d' > crontab.txt
+crontab crontab.txt >/dev/null 2>&1
+rm -f crontab.txt >/dev/null 2>&1
 
-    if [[ ${package_manager} == 'dnf' || ${package_manager} == 'yum' ]];then
-        systemctl restart crond >/dev/null 2>&1
-    else
-        systemctl restart cron >/dev/null 2>&1
-    fi
+if [[ ${package_manager} == 'dnf' || ${package_manager} == 'yum' ]]; then
+    service crond restart >/dev/null 2>&1
+else
+    service cron restart >/dev/null 2>&1
+fi
 
     #删除multi-v2ray环境变量
     sed -i '/v2ray/d' ~/$env_file
     sed -i '/xray/d' ~/$env_file
-    source ~/$env_file
+    . ~/$env_file
 
     rc_service=`systemctl status rc-local|grep loaded|egrep -o "[A-Za-z/]+/rc-local.service"`
 
@@ -230,10 +230,10 @@ EOF
 profileInit() {
 
     #清理v2ray模块环境变量
-    [[ $(grep v2ray ~/$env_file) ]] && sed -i '/v2ray/d' ~/$env_file && source ~/$env_file
+    [[ $(grep v2ray ~/$env_file) ]] && sed -i '/v2ray/d' ~/$env_file && . ~/$env_file
 
     #解决Python3中文显示问题
-    [[ -z $(grep PYTHONIOENCODING=utf-8 ~/$env_file) ]] && echo "export PYTHONIOENCODING=utf-8" >> ~/$env_file && source ~/$env_file
+    [[ -z $(grep PYTHONIOENCODING=utf-8 ~/$env_file) ]] && echo "export PYTHONIOENCODING=utf-8" >> ~/$env_file && . ~/$env_file
 
     #全新安装的新配置
     [[ ${install_way} == 0 ]] && v2ray new
